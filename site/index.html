@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where India's court cases wait</title>
+<meta name="description" content="District court backlog, the witness stage, and what faster evidence recording would change. Built on the live NJDG numbers.">
+<meta property="og:title" content="Where India's court cases wait">
+<meta property="og:description" content="5.27 crore pending cases, the witness stage, and a what-if model for faster evidence recording. Built on NJDG data.">
+<meta property="og:image" content="og.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23E4EBE6'/%3E%3Cpath d='M6 24 C12 23 16 20 20 13 S25 6 27 5' stroke='%23B4232A' stroke-width='3' fill='none'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E4EBE6; --surface:#F3F6F4; --ink:#15261F; --muted:#56706A; --rule:#B9C8C0; --faint:#CFDBD4;
+  --tape:#B4232A; --filed:#3F78BA; --closed:#12805F; --bar:#93ABA2;
+  --display:"Bricolage Grotesque", Georgia, serif;
+  --serif:"Source Serif 4", Georgia, serif;
+  --data:"IBM Plex Sans Condensed", "Arial Narrow", sans-serif;
+  --measure:68ch; --wide:1120px;
+  --ease-expo:cubic-bezier(.16,1,.3,1);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 1.125rem/1.62 var(--serif);
+  font-optical-sizing:auto;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration-thickness:1px;text-underline-offset:3px}
+a:hover{color:var(--tape)}
+:focus-visible{outline:2px solid var(--tape);outline-offset:3px;border-radius:2px}
+.wrap{max-width:var(--wide);margin:0 auto;padding:0 32px}
+.prose{max-width:var(--measure)}
+h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:-.02em;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.3rem,1.3rem + 3.6vw,4.2rem);line-height:1.0;max-width:17ch;font-weight:750}
+h2{font-size:clamp(1.7rem,1.2rem + 1.8vw,2.6rem);line-height:1.08;margin-bottom:.6em;max-width:24ch}
+h3{font-size:1.15rem;letter-spacing:-.01em}
+p{margin:0 0 1em}
+.num,.tnum{font-family:var(--data);font-variant-numeric:tabular-nums lining-nums}
+strong.hl{font-weight:600;background:linear-gradient(transparent 62%,rgba(180,35,42,.18) 62%)}
+
+/* top strip */
+.strip{display:flex;justify-content:space-between;gap:16px;align-items:center;padding:18px 0;
+  font:500 .9rem/1.3 var(--data);color:var(--muted);border-bottom:1px solid var(--rule)}
+.strip b{color:var(--ink);font-weight:600}
+.tape-mark{display:inline-block;width:22px;height:4px;background:var(--tape);vertical-align:middle;margin-right:10px;border-radius:2px}
+
+/* hero */
+.hero{padding:clamp(36px,6vw,72px) 0 8px}
+.hero-top{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:clamp(24px,4vw,56px);align-items:end}
+.hero .lede{font-size:clamp(1.08rem,1rem + .3vw,1.22rem);max-width:46ch;margin:0;color:#22372F}
+.hero-top h1{max-width:15ch}
+.hero-chart{margin-top:clamp(24px,3vw,36px)}
+figure{margin:0}
+.chart{width:100%;position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+figcaption,.src{font:400 .86rem/1.45 var(--data);color:var(--muted);margin-top:10px;max-width:90ch}
+.ctitle{font:600 1rem/1.3 var(--data);color:var(--ink);margin:0 0 2px}
+.csub{font:400 .9rem/1.35 var(--data);color:var(--muted);margin:0 0 12px}
+.axis text{font:400 12.5px var(--data);fill:var(--muted)}
+.axis line,.axis path{stroke:var(--rule)}
+.grid line{stroke:var(--faint)}
+.ann{font:500 13px var(--data);fill:var(--ink)}
+.ann-muted{font:400 12.5px var(--data);fill:var(--muted)}
+.lbl{font:600 13px var(--data)}
+
+section{padding:clamp(56px,8vw,104px) 0 0}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:clamp(24px,5vw,64px);align-items:start}
+.kicker-line{width:56px;height:4px;background:var(--tape);border-radius:2px;margin-bottom:18px}
+
+/* states */
+.smalls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;margin-top:8px}
+.smalls h3{margin-bottom:2px}
+.smalls .meta{font:400 .88rem/1.35 var(--data);color:var(--muted);margin-bottom:6px}
+
+/* model */
+.model{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:clamp(20px,3vw,36px);
+  display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr);gap:clamp(24px,4vw,48px);margin-top:28px}
+.ctrl{margin-bottom:20px}
+.ctrl label{display:flex;justify-content:space-between;gap:12px;font:500 .98rem/1.3 var(--data);margin-bottom:6px}
+.ctrl label output{font-weight:600;color:var(--ink);white-space:nowrap}
+.ctrl small{display:block;font:400 .82rem/1.35 var(--data);color:var(--muted);margin-top:4px}
+.ctrl small.assume{color:var(--tape)}
+input[type=range]{width:100%;accent-color:var(--tape);height:28px;margin:0}
+select{font:500 1rem var(--data);color:var(--ink);background:#fff;border:1px solid var(--rule);border-radius:8px;
+  padding:10px 12px;width:100%;min-height:44px}
+.verdict{font:400 1.22rem/1.45 var(--serif);margin:0 0 14px}
+.verdict b{font-family:var(--data);font-weight:600}
+.readout{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);margin:6px 0 18px}
+.readout div{padding:12px 12px 12px 0}
+.readout div+div{padding-left:14px;border-left:1px solid var(--rule)}
+.readout span{display:block;font:400 .8rem/1.3 var(--data);color:var(--muted)}
+.readout b{font:600 1.3rem/1.2 var(--data);font-variant-numeric:tabular-nums}
+
+/* checks table */
+table{border-collapse:collapse;width:100%;font:400 .95rem/1.4 var(--data)}
+th{font-weight:600;text-align:left;color:var(--muted);border-bottom:1.5px solid var(--ink);padding:8px 10px 8px 0;vertical-align:bottom}
+td{border-bottom:1px solid var(--rule);padding:10px 10px 10px 0;vertical-align:top}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.badge{display:inline-block;font:600 .8rem/1 var(--data);padding:5px 8px;border-radius:999px;white-space:nowrap}
+.b-ok{background:#D2E6DC;color:#0D5A43}.b-live{background:#E2E7E4;color:#3E554D}.b-bad{background:#F3D6D6;color:#8E1B21}
+.tablewrap{overflow-x:auto;margin-top:16px}
+details{margin-top:12px;font:400 .9rem var(--data);color:var(--muted)}
+details summary{cursor:pointer;min-height:32px;display:flex;align-items:center}
+details table{margin-top:8px;font-size:.86rem}
+
+.method{columns:2 320px;column-gap:48px;font-size:1rem}
+.method p{break-inside:avoid}
+.method h3{margin:0 0 6px}
+.method div{break-inside:avoid;margin-bottom:22px}
+footer{margin-top:clamp(64px,9vw,120px);padding:28px 0 48px;border-top:1px solid var(--rule);
+  font:400 .92rem/1.5 var(--data);color:var(--muted)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:12px 32px;justify-content:space-between}
+
+#tip{position:fixed;pointer-events:none;z-index:20;background:var(--ink);color:#EEF3F0;font:400 13px/1.4 var(--data);
+  padding:8px 10px;border-radius:8px;opacity:0;transition:opacity 120ms ease;max-width:260px;box-shadow:0 8px 24px -8px rgba(21,38,31,.5)}
+#tip b{font-weight:600}
+
+.draw{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:draw 1600ms var(--ease-expo) 200ms forwards}
+.fadein{opacity:0;animation:fade 700ms ease-out 1300ms forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fade{to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.draw{animation:none;stroke-dashoffset:0}.fadein{animation:none;opacity:1}}
+
+@media (max-width:860px){
+  .hero-top{grid-template-columns:minmax(0,1fr)}
+  .two,.model{grid-template-columns:minmax(0,1fr)}
+  .smalls{grid-template-columns:minmax(0,1fr);gap:36px}
+}
+@media (max-width:560px){
+  .wrap{padding:0 16px}
+  body{font-size:1.0625rem}
+  .strip{flex-direction:column;align-items:flex-start;gap:4px}
+  .readout{grid-template-columns:minmax(0,1fr)}
+  .readout div+div{padding-left:0;border-left:0;border-top:1px solid var(--rule)}
+  .hide-sm{display:none}
+  #t-checks thead{display:none}
+  #t-checks tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px 14px;padding:14px 0;border-bottom:1px solid var(--rule)}
+  #t-checks td{border:0;padding:0}
+  #t-checks td:first-child{grid-column:1/-1;font-weight:500;color:var(--ink)}
+  #t-checks td.r{text-align:left}
+  #t-checks td.gap:not(:empty)::before{content:"Gap ";color:var(--muted)}
+  #t-checks td:last-child{align-self:center}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="strip">
+    <span><span class="tape-mark" aria-hidden="true"></span><b>District courts of India</b>, NJDG snapshot of <span id="snap">26 Nov 2026</span></span>
+    <span class="hide-sm">An independent analysis. Not made by or for Adalat AI.</span>
+  </div>
+
+  <header class="hero">
+    <div class="hero-top">
+    <h1>India's district courts close fewer cases than they take in. Every year.</h1>
+    <p class="lede">There are <strong class="hl num" id="h-pending">5.27 crore</strong> cases waiting in district courts. The single most common thing those cases are waiting for is a witness to be examined. This page measures the backlog from the government's own data, then asks how much faster evidence recording could change it.</p>
+    </div>
+    <figure class="hero-chart">
+      <p class="ctitle">Pending cases by the year they were filed</p>
+      <p class="csub">Lakh cases, all district and subordinate courts, civil and criminal</p>
+      <div class="chart" id="c-hero" role="img" aria-label="Area chart of pending district court cases by year of filing, from 1952 to 2026, rising sharply in recent years."></div>
+      <figcaption>Source: <a href="https://njdg.ecourts.gov.in/njdg_v3/">National Judicial Data Grid</a>, year wise pendency, fetched <span class="snapt">26 Nov 2026</span>. 2026 is the year so far.</figcaption>
+    </figure>
+  </header>
+
+  <section id="flow">
+    <div class="two">
+      <div class="prose">
+        <div class="kicker-line" aria-hidden="true"></div>
+        <h2>More cases come in than go out</h2>
+        <p>In 2025 district courts took in <b class="num" id="f-in"></b> new cases and closed <b class="num" id="f-out"></b>. The difference, <b class="num" id="f-gap"></b>, was added to the pile. That has happened in every year NJDG reports, 2018 to 2026.</p>
+        <p>The gap is not huge next to the flow: courts close about <span class="num" id="f-ratio"></span> cases for every 100 that arrive. That matters for the model further down. A tool does not have to double court output to stop the backlog growing. It has to close a few percent more.</p>
+      </div>
+      <figure>
+        <p class="ctitle">Cases filed and cases closed each year</p>
+        <p class="csub">Lakh cases per year, red band is the yearly addition to the backlog</p>
+        <div class="chart" id="c-flow" role="img" aria-label="Line chart of cases filed and closed per year 2018 to 2026; filed is above closed in every year."></div>
+        <figcaption>Source: NJDG, institution vs disposal chart. 2026 runs to the fetch date, so its gap is not comparable yet.</figcaption>
+        <details><summary>Show the numbers</summary><div id="t-flow"></div></details>
+      </figure>
+    </div>
+  </section>
+
+  <section id="stage">
+    <div class="two">
+      <div class="prose">
+        <div class="kicker-line" aria-hidden="true"></div>
+        <h2>The queue is longest at the witness box</h2>
+        <p>Each pending case has a next hearing with a purpose. The most common purpose is <strong class="hl">witness examination: <span class="num" id="s-wit"></span> cases</strong>, about <span class="num" id="s-share"></span> of every case whose stage is recorded.</p>
+        <p>This is the step Adalat AI's courtroom transcription speeds up. A magistrate quoted on its site says they could hear two to three witnesses a day before, and five to six after. Separately, NJDG lists "witness" as the delay reason on <span class="num" id="s-delay"></span> cases.</p>
+      </div>
+      <figure>
+        <p class="ctitle">What pending cases are waiting for next</p>
+        <p class="csub">Lakh cases, by purpose of the next hearing, top 12</p>
+        <div class="chart" id="c-stage" role="img" aria-label="Bar chart of pending cases by stage; witness examination is the largest."></div>
+        <figcaption>Source: NJDG, stage wise pendency (purpose of next hearing). Labels are NJDG's own: NBW is non bailable warrant, WS is written statement.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="states">
+    <div class="prose">
+      <div class="kicker-line" aria-hidden="true"></div>
+      <h2>Three states, three different stories</h2>
+      <p>Uttar Pradesh holds the largest backlog. Maharashtra is second and fell behind in every year shown. Kerala, smaller, closes roughly as many cases as it receives. National averages hide this, so the model below can be run for any state.</p>
+    </div>
+    <div class="smalls" id="smalls"></div>
+    <p class="src">Source: NJDG state dashboards. Each panel has its own scale. Dashed segment is 2026 so far.</p>
+  </section>
+
+  <section id="model">
+    <div class="prose">
+      <div class="kicker-line" aria-hidden="true"></div>
+      <h2>What if evidence were recorded twice as fast?</h2>
+      <p>A simple throughput model. Only contested trials need witnesses, and only part of a contested trial's court time is evidence. So faster recording speeds up that part, in the courtrooms that have it. Every input is a slider, and the one that is my own guess is marked as a guess.</p>
+    </div>
+    <div class="model">
+      <div>
+        <div class="ctrl">
+          <label for="m-region">Where</label>
+          <select id="m-region"></select>
+        </div>
+        <div class="ctrl">
+          <label for="m-cov">Courtrooms with fast recording <output id="o-cov"></output></label>
+          <input type="range" id="m-cov" min="0" max="100" step="1">
+          <small>Adalat AI's site says 20 to 25% of courtrooms nationwide.</small>
+        </div>
+        <div class="ctrl">
+          <label for="m-wit">Witnesses heard per day, after <output id="o-wit"></output></label>
+          <input type="range" id="m-wit" min="2.5" max="8" step="0.5">
+          <small>Before is fixed at 2.5, from the magistrate's quote (two to three). The quote's after figure is five to six.</small>
+        </div>
+        <div class="ctrl">
+          <label for="m-evi">Share of trial court time spent on evidence <output id="o-evi"></output></label>
+          <input type="range" id="m-evi" min="10" max="90" step="5">
+          <small class="assume">My assumption. I found no public figure for this, so test the range.</small>
+        </div>
+        <div class="ctrl">
+          <label for="m-con">Share of closed cases that are contested <output id="o-con"></output></label>
+          <input type="range" id="m-con" min="5" max="60" step="1">
+          <small>NJDG, national, last month: <span id="con-src"></span>. No state split is published, so states use the national share.</small>
+        </div>
+      </div>
+      <div>
+        <p class="verdict" id="m-verdict" aria-live="polite"></p>
+        <div class="readout">
+          <div><span>Extra cases closed a year</span><b id="r-extra"></b></div>
+          <div><span>Backlog change a year</span><b id="r-net"></b></div>
+          <div><span>Courtrooms needed to stop growth</span><b id="r-be"></b></div>
+        </div>
+        <p class="ctitle">Pending cases over the next ten years</p>
+        <p class="csub">Lakh cases, straight line from 2025 flows</p>
+        <div class="chart" id="c-model" role="img" aria-label="Projection of pending cases with and without faster evidence recording."></div>
+        <p class="src">Flows are 2025, the last full year. Pending is today's count. Freed court time is assumed to go to more trials, not elsewhere.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="checks">
+    <div class="prose">
+      <div class="kicker-line" aria-hidden="true"></div>
+      <h2>Before trusting any of this, I checked NJDG against itself</h2>
+      <p>The dashboard shows the same quantity in several places. Most agree. Some do not, and one gap is close to ten lakh cases. Gaps of a few dozen are live updates between my requests a few minutes apart; the larger ones are not, and anyone building on this data should know where they are.</p>
+    </div>
+    <div class="tablewrap"><table id="t-checks"></table></div>
+    <p class="src">Every row is computed by scripts/build_data.py from one snapshot. "Live drift" means under 1,000 cases apart.</p>
+  </section>
+
+  <section id="method">
+    <div class="prose">
+      <div class="kicker-line" aria-hidden="true"></div>
+      <h2>How this was made</h2>
+    </div>
+    <div class="method">
+      <div><h3>Data</h3><p>NJDG has no public API. A Python script opens the dashboard in a headless browser and calls the same requests the page makes when you click a tile, for India and for each of 36 states and union territories. The raw responses are saved untouched, then a second script turns them into the one JSON file this page reads.</p></div>
+      <div><h3>Scope</h3><p>District and subordinate courts only. High Courts and the Supreme Court have their own grids and are not included. Pre litigation cases (12.4 lakh) are excluded, as NJDG does in its totals.</p></div>
+      <div><h3>The model</h3><p>Speed up per contested case = 1 / ((1 − e) + e × before / after), where e is the evidence share. Extra closures = closures × contested share × coverage × (speed up − 1). It is a back of envelope throughput model, not a forecast: it ignores adjournments, judge vacancies and new filing trends.</p></div>
+      <div><h3>Caveats I would raise first</h3><p>The contested share is one month of national data. 2026 is a partial year. NJDG coverage has grown since 2018, so early years may undercount. Uttar Pradesh closed more than it received in 2025, but its 2026 filings so far are already 41% above all of 2025, so its "shrinking" result may not last.</p></div>
+      <div><h3>Code</h3><p>Everything, including the raw snapshot, is on <a href="https://github.com/techi101/adalat-court-analytics">GitHub</a>. Re run the two scripts to refresh.</p></div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Made by Nitesh Kumar Yadav, final year B.Tech, ECE (AI and ML), NSUT Delhi.</span>
+    <span>Independent work using public data. Not affiliated with Adalat AI or the eCommittee.</span>
+  </div>
+</footer>
+<div id="tip" role="tooltip"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const LAKH = 1e5, CRORE = 1e7;
+const fmtIN = n => Math.round(n).toLocaleString('en-IN');
+function human(n, d = 1) {
+  const a = Math.abs(n);
+  if (a >= CRORE) return (n / CRORE).toFixed(2) + ' crore';
+  if (a >= LAKH) return (n / LAKH).toFixed(d) + ' lakh';
+  return fmtIN(n);
+}
+const pct = (x, d = 0) => (x * 100).toFixed(d) + '%';
+const tip = $('#tip');
+function showTip(ev, html) {
+  tip.innerHTML = html; tip.style.opacity = 1;
+  const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = ev.clientX + pad, y = ev.clientY - h - pad;
+  if (x + w > innerWidth - 8) x = ev.clientX - w - pad;
+  if (y < 8) y = ev.clientY + pad;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+const hideTip = () => tip.style.opacity = 0;
+
+function frame(el, aspect, m) {
+  const W = el.clientWidth, H = Math.max(220, Math.round(W * aspect));
+  el.innerHTML = '';
+  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width', W).attr('height', H);
+  return { svg, W, H, iw: W - m.l - m.r, ih: H - m.t - m.b, g: svg.append('g').attr('transform', `translate(${m.l},${m.t})`) };
+}
+function yAxis(f, y, ticks = 5, fmt = v => (v / LAKH).toLocaleString('en-IN')) {
+  f.g.append('g').attr('class', 'grid').call(d3.axisLeft(y).ticks(ticks).tickSize(-f.iw).tickFormat('')).select('.domain').remove();
+  f.g.append('g').attr('class', 'axis').call(d3.axisLeft(y).ticks(ticks).tickSize(0).tickPadding(8).tickFormat(fmt)).select('.domain').remove();
+}
+
+let D;
+fetch('data.json').then(r => r.json()).then(data => { D = data; init(); });
+
+function init() {
+  const snap = new Date(D.fetched_at_utc).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' });
+  $('#snap').textContent = snap; document.querySelectorAll('.snapt').forEach(e => e.textContent = snap);
+  $('#h-pending').textContent = human(D.tiles.total);
+  const f25 = D.flows.find(f => f.year === 2025);
+  $('#f-in').textContent = human(f25.instituted); $('#f-out').textContent = human(f25.disposed);
+  $('#f-gap').textContent = human(f25.instituted - f25.disposed);
+  $('#f-ratio').textContent = Math.round(f25.disposed / f25.instituted * 100);
+  const wit = D.stages_all.find(s => s.stage.startsWith('Witness'));
+  $('#s-wit').textContent = human(wit.pending); $('#s-share').textContent = pct(wit.pending / D.stage_total);
+  $('#s-delay').textContent = human(D.delay_reasons.find(r => r.reason === 'Witness').pending);
+  $('#con-src').textContent = `${human(D.last_month.contested[2])} of ${human(D.last_month.disposed[2])} closed, ${pct(D.last_month.contested_share, 1)}`;
+  flowTable(); checksTable(); setupModel();
+  drawAll(true);
+  let t; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => drawAll(false), 150); });
+}
+let lastW = 0;
+function drawAll(first) {
+  const w = innerWidth; if (!first && w === lastW) return; lastW = w;
+  hero(first); flow(); stages(); smalls(); runModel();
+}
+
+/* hero: backlog by filing year */
+function hero(animate) {
+  const el = $('#c-hero'), small = el.clientWidth < 600;
+  const f = frame(el, small ? 0.78 : 0.29, { t: 16, r: small ? 12 : 24, b: 30, l: small ? 34 : 44 });
+  const data = D.by_filing_year;
+  const x = d3.scaleLinear().domain(d3.extent(data, d => d.year)).range([0, f.iw]);
+  const y = d3.scaleLinear().domain([0, d3.max(data, d => d.pending) * 1.08]).range([f.ih, 0]).nice();
+  yAxis(f, y, small ? 4 : 5);
+  f.g.append('g').attr('class', 'axis').attr('transform', `translate(0,${f.ih})`)
+    .call(d3.axisBottom(x).ticks(small ? 5 : 10).tickFormat(d3.format('d')).tickSizeOuter(0));
+  const area = d3.area().x(d => x(d.year)).y0(f.ih).y1(d => y(d.pending)).curve(d3.curveMonotoneX);
+  const line = d3.line().x(d => x(d.year)).y(d => y(d.pending)).curve(d3.curveMonotoneX);
+  f.g.append('path').datum(data).attr('d', area).attr('fill', 'rgba(180,35,42,.10)').attr('class', animate ? 'fadein' : '');
+  const p = f.g.append('path').datum(data).attr('d', line).attr('fill', 'none').attr('stroke', 'var(--tape)').attr('stroke-width', 2.5).attr('stroke-linejoin', 'round');
+  if (animate) { const L = p.node().getTotalLength(); p.attr('class', 'draw').style('--len', L); }
+  // annotations
+  const first = data[0], last = data[data.length - 1];
+  const over10 = D.age_national['10-20 yrs'] + D.age_national['20-30 yrs'] + D.age_national['30+ yrs'];
+  const a = f.g.append('g').attr('class', animate ? 'fadein' : '');
+  const ax = x(first.year), ay = y(0);
+  a.append('line').attr('x1', ax).attr('x2', ax).attr('y1', ay - 6).attr('y2', small ? ay - 60 : ay - 70).attr('stroke', 'var(--ink)');
+  a.append('circle').attr('cx', ax).attr('cy', ay - 2).attr('r', 4).attr('fill', 'var(--tape)').attr('stroke', 'var(--paper)').attr('stroke-width', 2);
+  const t1 = a.append('text').attr('class', 'ann').attr('x', ax + 6).attr('y', small ? ay - 66 : ay - 76);
+  t1.append('tspan').text(`The oldest still pending case was filed in ${first.year}.`);
+  t1.append('tspan').attr('class', 'ann-muted').attr('x', ax + 6).attr('dy', 16).text(`${human(over10)} cases are over ten years old.`);
+  const lx = x(last.year), ly = y(last.pending);
+  const t2 = a.append('text').attr('class', 'ann').attr('text-anchor', 'end').attr('x', lx - 12).attr('y', ly + 4);
+  t2.append('tspan').text(`${human(last.pending)} filed in ${last.year}`);
+  t2.append('tspan').attr('class', 'ann-muted').attr('x', lx - 12).attr('dy', 16).text('are still open');
+  a.append('circle').attr('cx', lx).attr('cy', ly).attr('r', 4.5).attr('fill', 'var(--tape)').attr('stroke', 'var(--paper)').attr('stroke-width', 2);
+  hoverYears(f, x, data.map(d => d.year), yr => {
+    const d = data.find(e => e.year === yr); return d ? `<b>Filed in ${yr}</b><br>${fmtIN(d.pending)} still pending` : '';
+  }, yr => { const d = data.find(e => e.year === yr); return d ? [y(d.pending)] : []; });
+}
+
+function hoverYears(f, x, years, html, ys, colors = ['var(--tape)']) {
+  const guide = f.g.append('line').attr('y1', 0).attr('y2', f.ih).attr('stroke', 'var(--ink)').attr('stroke-opacity', .35).style('display', 'none');
+  const dots = f.g.append('g');
+  f.g.append('rect').attr('width', f.iw).attr('height', f.ih).attr('fill', 'transparent')
+    .on('pointermove', ev => {
+      const [mx] = d3.pointer(ev); const yr = years.reduce((a, b) => Math.abs(x(b) - mx) < Math.abs(x(a) - mx) ? b : a);
+      guide.style('display', null).attr('x1', x(yr)).attr('x2', x(yr));
+      dots.selectAll('circle').data(ys(yr)).join('circle').attr('cx', x(yr)).attr('cy', d => d).attr('r', 4.5)
+        .attr('fill', (d, i) => colors[i % colors.length]).attr('stroke', 'var(--paper)').attr('stroke-width', 2);
+      showTip(ev, html(yr));
+    })
+    .on('pointerleave', () => { guide.style('display', 'none'); dots.selectAll('*').remove(); hideTip(); });
+}
+
+/* filed vs closed */
+function flowChart(el, flows, opts = {}) {
+  const small = el.clientWidth < 420;
+  const f = frame(el, opts.aspect || (small ? 0.78 : 0.62), { t: 14, r: opts.r ?? (small ? 58 : 66), b: 28, l: opts.l || 40 });
+  const x = d3.scaleLinear().domain(d3.extent(flows, d => d.year)).range([0, f.iw]);
+  const y = d3.scaleLinear().domain([0, d3.max(flows, d => Math.max(d.instituted, d.disposed)) * 1.1]).range([f.ih, 0]).nice();
+  yAxis(f, y, 4, opts.fmt);
+  f.g.append('g').attr('class', 'axis').attr('transform', `translate(0,${f.ih})`)
+    .call(d3.axisBottom(x).ticks(small ? 4 : flows.length).tickFormat(d => small ? "'" + String(d).slice(2) : d).tickSizeOuter(0));
+  const full = flows.filter(d => d.year <= 2025), part = flows.filter(d => d.year >= 2025);
+  const band = d3.area().x(d => x(d.year)).y0(d => y(d.disposed)).y1(d => y(d.instituted)).curve(d3.curveMonotoneX);
+  f.g.append('path').datum(full).attr('d', band).attr('fill', 'rgba(180,35,42,.16)');
+  for (const [key, col] of [['instituted', 'var(--filed)'], ['disposed', 'var(--closed)']]) {
+    const ln = d3.line().x(d => x(d.year)).y(d => y(d[key])).curve(d3.curveMonotoneX);
+    f.g.append('path').datum(full).attr('d', ln).attr('fill', 'none').attr('stroke', col).attr('stroke-width', 2.25);
+    f.g.append('path').datum(part).attr('d', ln).attr('fill', 'none').attr('stroke', col).attr('stroke-width', 2).attr('stroke-dasharray', '4 4');
+    const L = flows[flows.length - 1];
+    f.g.append('text').attr('class', 'lbl').attr('x', x(L.year) + 6).attr('y', y(L[key]) + 4)
+      .attr('dy', key === 'instituted' ? (L.instituted < L.disposed ? 8 : -2) : (L.instituted < L.disposed ? -2 : 10))
+      .attr('fill', 'var(--ink)').text(key === 'instituted' ? 'Filed' : 'Closed');
+  }
+  hoverYears(f, x, flows.map(d => d.year), yr => {
+    const d = flows.find(e => e.year === yr);
+    return `<b>${yr}${yr === 2026 ? ' (so far)' : ''}</b><br>Filed ${fmtIN(d.instituted)}<br>Closed ${fmtIN(d.disposed)}<br>Gap ${fmtIN(d.instituted - d.disposed)}`;
+  }, yr => { const d = flows.find(e => e.year === yr); return [y(d.instituted), y(d.disposed)]; }, ['var(--filed)', 'var(--closed)']);
+}
+function flow() { flowChart($('#c-flow'), D.flows); }
+function flowTable() {
+  $('#t-flow').innerHTML = '<table><tr><th>Year</th><th class="r">Filed</th><th class="r">Closed</th><th class="r">Gap</th></tr>' +
+    D.flows.map(d => `<tr><td>${d.year}${d.year === 2026 ? ' (so far)' : ''}</td><td class="r">${fmtIN(d.instituted)}</td><td class="r">${fmtIN(d.disposed)}</td><td class="r">${fmtIN(d.instituted - d.disposed)}</td></tr>`).join('') + '</table>';
+}
+
+/* stages */
+function stages() {
+  const el = $('#c-stage'), data = D.stages_all, small = el.clientWidth < 460;
+  const rowH = small ? 26 : 28, m = { t: 4, r: 56, b: 26, l: small ? 108 : 124 };
+  const W = el.clientWidth, H = m.t + m.b + rowH * data.length;
+  el.innerHTML = '';
+  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width', W).attr('height', H);
+  const g = svg.append('g').attr('transform', `translate(${m.l},${m.t})`), iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const x = d3.scaleLinear().domain([0, d3.max(data, d => d.pending)]).range([0, iw]).nice();
+  const y = d3.scaleBand().domain(data.map(d => d.stage)).range([0, ih]).padding(.28);
+  g.append('g').attr('class', 'grid').attr('transform', `translate(0,${ih})`).call(d3.axisBottom(x).ticks(4).tickSize(-ih).tickFormat('')).select('.domain').remove();
+  g.append('g').attr('class', 'axis').attr('transform', `translate(0,${ih})`).call(d3.axisBottom(x).ticks(4).tickSize(0).tickPadding(8).tickFormat(v => (v / LAKH).toLocaleString('en-IN'))).select('.domain').remove();
+  g.append('g').attr('class', 'axis').call(d3.axisLeft(y).tickSize(0).tickPadding(8)).select('.domain').remove();
+  g.selectAll('.axis text').filter(d => typeof d === 'string' && d.startsWith('Witness')).style('fill', 'var(--ink)').style('font-weight', 600);
+  const isW = d => d.stage.startsWith('Witness');
+  g.selectAll('rect.b').data(data).join('rect').attr('class', 'b').attr('x', 0).attr('y', d => y(d.stage))
+    .attr('height', y.bandwidth()).attr('width', d => Math.max(2, x(d.pending))).attr('rx', 3)
+    .attr('fill', d => isW(d) ? 'var(--tape)' : 'var(--bar)');
+  g.selectAll('text.v').data(data).join('text').attr('class', 'tnum').attr('x', d => x(d.pending) + 6).attr('y', d => y(d.stage) + y.bandwidth() / 2 + 4)
+    .style('font', `${isW ? 500 : 400} 12.5px var(--data)`).attr('fill', d => isW(d) ? 'var(--ink)' : 'var(--muted)')
+    .text(d => (d.pending / LAKH).toFixed(1));
+  g.selectAll('rect.hit').data(data).join('rect').attr('class', 'hit').attr('x', -m.l).attr('width', iw + m.l + m.r).attr('y', d => y(d.stage) - 3).attr('height', y.bandwidth() + 6).attr('fill', 'transparent')
+    .on('pointermove', (ev, d) => showTip(ev, `<b>${d.stage}</b><br>${fmtIN(d.pending)} pending cases<br>${pct(d.pending / D.stage_total, 1)} of cases with a stage`)).on('pointerleave', hideTip);
+}
+
+/* state small multiples */
+function smalls() {
+  const box = $('#smalls'); box.innerHTML = '';
+  for (const name of D.focus) {
+    const s = D.states.find(x => x.state === name);
+    const div = document.createElement('div');
+    const gap = s.ins_2025 - s.disp_2025;
+    div.innerHTML = `<h3>${name}</h3><div class="meta">${human(s.pending)} pending, ${pct(s.older_than_3y / s.pending)} older than 3 years. In 2025 it ${gap > 0 ? 'fell behind by ' + human(gap) : 'closed ' + human(-gap) + ' more than it received'}.</div><div class="chart"></div>`;
+    box.appendChild(div);
+    flowChart(div.querySelector('.chart'), s.flows, { aspect: .62, r: 54, l: 36 });
+  }
+}
+
+/* model */
+function setupModel() {
+  const sel = $('#m-region');
+  const opts = [{ v: 'India', t: 'India, all states' }].concat(D.states.filter(s => s.pending > 50000).map(s => ({ v: s.state, t: s.state })));
+  sel.innerHTML = opts.map(o => `<option value="${o.v}">${o.t}</option>`).join('');
+  const md = D.model_defaults;
+  $('#m-cov').value = md.coverage.value * 100; $('#m-wit').value = md.witnesses_after.value;
+  $('#m-evi').value = md.evidence_share.value * 100; $('#m-con').value = Math.round(md.contested_share.value * 100);
+  ['#m-region', '#m-cov', '#m-wit', '#m-evi', '#m-con'].forEach(id => $(id).addEventListener('input', runModel));
+}
+function region() {
+  const r = $('#m-region').value;
+  if (r === 'India') { const f = D.flows.find(f => f.year === 2025); return { name: 'India', P: D.tiles.total, I: f.instituted, Dp: f.disposed }; }
+  const s = D.states.find(x => x.state === r); return { name: r, P: s.pending, I: s.ins_2025, Dp: s.disp_2025 };
+}
+function runModel() {
+  if (!D) return;
+  const c = +$('#m-cov').value / 100, w1 = +$('#m-wit').value, w0 = D.model_defaults.witnesses_before.value;
+  const e = +$('#m-evi').value / 100, k = +$('#m-con').value / 100;
+  $('#o-cov').textContent = pct(c); $('#o-wit').textContent = w1.toFixed(1); $('#o-evi').textContent = pct(e); $('#o-con').textContent = pct(k);
+  const R = region();
+  const s = 1 / ((1 - e) + e * w0 / w1);
+  const extra = R.Dp * k * c * (s - 1);
+  const net0 = R.I - R.Dp, net1 = net0 - extra;
+  const perPct = R.Dp * k * (s - 1);
+  const be = net0 > 0 ? (perPct > 0 ? net0 / perPct : Infinity) : 0;
+  $('#r-extra').textContent = human(extra);
+  $('#r-net').textContent = (net1 > 0 ? '+' : '−') + human(Math.abs(net1));
+  $('#r-be').textContent = net0 <= 0 ? 'Already shrinking' : (be > 1 ? 'Over 100%' : pct(be));
+  const where = R.name === 'India' ? "India's district courts" : R.name;
+  let v;
+  if (net0 > 0 && net1 > 0) v = `In ${where}, this closes <b>${pct(extra / net0)}</b> of the yearly gap. The backlog still grows, by <b>${human(net1)}</b> a year instead of ${human(net0)}.`;
+  else if (net0 > 0) v = `In ${where}, this is enough to turn the backlog around: it shrinks by <b>${human(-net1)}</b> a year. At that pace today's pile takes <b>${Math.round(R.P / -net1)} years</b> to clear.`;
+  else v = `${where} already closed more than it received in 2025. This takes the time to clear today's pile from <b>${Math.round(R.P / -net0)}</b> to <b>${Math.round(R.P / -net1)} years</b>.`;
+  const pl = R.name === 'India';
+  if (extra < 1) v = `No change at these settings: ${where} ${net0 > 0 ? (pl ? 'add ' : 'adds ') + human(net0) + ' cases a year to the backlog' : (pl ? 'shrink' : 'shrinks') + ' it by ' + human(-net0) + ' a year'}.`;
+  $('#m-verdict').innerHTML = v;
+  modelChart(R.P, net0, net1);
+}
+function modelChart(P, net0, net1) {
+  const el = $('#c-model'), small = el.clientWidth < 460;
+  const f = frame(el, small ? .75 : .5, { t: 12, r: small ? 64 : 110, b: 28, l: 46 });
+  const yrs = d3.range(0, 11), base = yrs.map(t => ({ t, v: Math.max(0, P + net0 * t) })), scen = yrs.map(t => ({ t, v: Math.max(0, P + net1 * t) }));
+  const x = d3.scaleLinear().domain([0, 10]).range([0, f.iw]);
+  const all = base.concat(scen).map(d => d.v);
+  const lo = d3.min(all), hi = d3.max(all), padv = (hi - lo) * .25 || P * .05;
+  const y = d3.scaleLinear().domain([Math.max(0, lo - padv), hi + padv]).range([f.ih, 0]).nice();
+  yAxis(f, y, 4);
+  f.g.append('g').attr('class', 'axis').attr('transform', `translate(0,${f.ih})`).call(d3.axisBottom(x).ticks(5).tickFormat(t => 2026 + t).tickSizeOuter(0));
+  const ln = d3.line().x(d => x(d.t)).y(d => y(d.v));
+  f.g.append('path').datum(base).attr('d', ln).attr('fill', 'none').attr('stroke', 'var(--muted)').attr('stroke-width', 2).attr('stroke-dasharray', '5 4');
+  f.g.append('path').datum(scen).attr('d', ln).attr('fill', 'none').attr('stroke', 'var(--tape)').attr('stroke-width', 2.5);
+  const lb = (d, txt, col, dy) => f.g.append('text').attr('class', 'lbl').attr('x', x(10) + 6).attr('y', y(d.v) + dy).attr('fill', 'var(--ink)').text(txt);
+  const b10 = base[10], s10 = scen[10], close = Math.abs(y(b10.v) - y(s10.v)) < 16, up = s10.v > b10.v;
+  lb(b10, 'As today', 'var(--muted)', close ? (up ? 14 : -6) : 4);
+  lb(s10, small ? 'Faster' : 'With fast recording', 'var(--tape)', close ? (up ? -6 : 14) : 4);
+  hoverYears(f, x, yrs, t => `<b>${2026 + t}</b><br>As today ${human(base[t].v)}<br>With fast recording ${human(scen[t].v)}`,
+    t => [y(base[t].v), y(scen[t].v)], ['var(--muted)', 'var(--tape)']);
+}
+
+/* checks */
+function checksTable() {
+  const rows = D.checks.map(c => {
+    let badge;
+    if (c.diff === null) badge = '<span class="badge b-bad">Data gap</span>';
+    else if (c.diff === 0) badge = '<span class="badge b-ok">Matches</span>';
+    else if (Math.abs(c.diff) < 1000) badge = '<span class="badge b-live">Live drift</span>';
+    else badge = '<span class="badge b-bad">Does not reconcile</span>';
+    const b = c.b === null ? (c.note || '') : fmtIN(c.b);
+    const diff = c.diff === null ? '' : (c.diff > 0 ? '+' : '') + fmtIN(c.diff);
+    return `<tr><td>${c.what}</td><td class="r">${fmtIN(c.a)}<br><small>${c.a_label}</small></td><td class="r">${b}<br><small>${c.b_label}</small></td><td class="r gap">${diff}</td><td>${badge}</td></tr>`;
+  }).join('');
+  $('#t-checks').innerHTML = `<thead><tr><th>What should match</th><th class="r">NJDG says</th><th class="r">NJDG also says</th><th class="r">Gap</th><th>Verdict</th></tr></thead><tbody>${rows}</tbody>`;
+}
+</script>
+</body>
+</html>
