@@ -3,3 +3,7 @@ shots/
 __pycache__/
 .vercel/
 *.pyc
+OUTREACH.md
+
+.vercel
+.env*
